@@ -14,10 +14,10 @@ class MainWindow(QMainWindow):
         self.inputValue = QLineEdit()
         self.inputValue.setMaxLength(5)
         self.inputValue.setPlaceholderText("Enter your Value")
-        # self.inputValue.returnPressed.connect(self.return_pressed)  # Connect to method in MainWindow
-        # self.inputValue.selectionChanged.connect(self.selection_changed)
-        # self.inputValue.textChanged.connect(self.text_changed)
-        # self.inputValue.textEdited.connect(self.text_edited)
+        self.inputValue.returnPressed.connect(self.return_pressed)  # Connect to method in MainWindow
+        self.inputValue.selectionChanged.connect(self.selection_changed)
+        self.inputValue.textChanged.connect(self.text_changed)
+        self.inputValue.textEdited.connect(self.text_edited)
 
 
         ### Create radio buttons
@@ -117,6 +117,23 @@ class MainWindow(QMainWindow):
             button.setIcon(QIcon())  # Clear the icon
             self.button_rotations[button] = 0  # Reset rotation angle to 0
         print("Buttons Cleared")
+
+
+    def return_pressed(self):
+        print("Return pressed!")
+        self.centralWidget().setText("BOOM!")
+
+    def selection_changed(self):
+        print("Selection changed")
+        print(self.centralWidget().selectedText())
+
+    def text_changed(self, s):
+        print("Text changed...")
+        print(s)
+
+    def text_edited(self, s):
+        print("Text edited...")
+        print(s)
 
 
 
