@@ -2,6 +2,11 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QRadioButton, QHBoxLayout, QGridLayout, QPushButton, QLineEdit
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon, QPixmap, QTransform
+from gui_to_file import initmatrix
+
+global Cvalue
+global blocksize
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -13,11 +18,18 @@ class MainWindow(QMainWindow):
 
         self.inputValue = QLineEdit()
         self.inputValue.setMaxLength(5)
+        default_text = "100"
+
+        global Cvalue
+        Cvalue = int(default_text)
+        print(Cvalue)
+
+
+        self.inputValue.setText(default_text)
         self.inputValue.setPlaceholderText("Enter your Value")
         self.inputValue.returnPressed.connect(self.return_pressed)  # Connect to method in MainWindow
-        self.inputValue.selectionChanged.connect(self.selection_changed)
-        self.inputValue.textChanged.connect(self.text_changed)
         self.inputValue.textEdited.connect(self.text_edited)
+
 
 
         ### Create radio buttons
@@ -54,6 +66,14 @@ class MainWindow(QMainWindow):
         
         ## number of column and rows of the grid
         n = 15
+        
+        ## size in pixel 
+        global blocksize
+        blocksize = 40
+
+        ## calling initmatrix function from another file to create emptry matrix
+        initmatrix(n)
+
         self.buttons = []  # List to hold all buttons
         self.button_rotations = {}  # Dictionary to store rotation angle for each button
 
@@ -61,7 +81,7 @@ class MainWindow(QMainWindow):
             for j in range(n):
                 button = QPushButton()
                 button.setCheckable(True)
-                button.setFixedSize(QSize(30, 30))
+                button.setFixedSize(QSize(blocksize, blocksize))
                 button.clicked.connect(lambda checked, i=i, j=j: self.button_clicked(i, j))
                 rightGrid.addWidget(button, i, j)
                 self.buttons.append(button)  # Add button to the list
@@ -90,14 +110,16 @@ class MainWindow(QMainWindow):
             print("Active Component:", self.active_component)
 
     def button_clicked(self, row, col):
-        print("Row, Col:", row, col, self.active_component)
-
+        global Cvalue
+        global blocksize
+        
         button = self.buttons[row * 15 + col]  # Get the button at the specified row and column
         icon_path = f"./icons/{self.active_component.lower()}.jpg"
         pixmap = QPixmap(icon_path)
 
         ## Rotate the image
         rotation = self.button_rotations[button]
+        # print("button rotation proprty : ",rotation)
         rotation += 90
         if rotation >= 360:
             rotation = 0
@@ -106,11 +128,21 @@ class MainWindow(QMainWindow):
 
         ## Set the rotated icon for the button
         button.setIcon(QIcon(rotated_pixmap))
-        button.setIconSize(QSize(30, 30))
+        button.setIconSize(QSize(blocksize, blocksize))
 
         ## Update the rotation angle for the button
         self.button_rotations[button] = rotation
 
+        
+        val = Cvalue
+        # print(self.active_component)
+        if self.active_component=='Wire' or self.active_component=='Node':
+            val = 0 
+        print("Row, Col:", row, col, self.active_component, val, rotation)
+
+
+
+    ## Added clear button
     def clear_buttons(self):
         for button in self.buttons:
             button.setChecked(False)
@@ -123,17 +155,9 @@ class MainWindow(QMainWindow):
         print("Return pressed!")
         self.centralWidget().setText("BOOM!")
 
-    def selection_changed(self):
-        print("Selection changed")
-        print(self.centralWidget().selectedText())
-
-    def text_changed(self, s):
-        print("Text changed...")
-        print(s)
-
     def text_edited(self, s):
-        print("Text edited...")
-        print(s)
+        value = s
+        print('value = ',value)
 
 
 
