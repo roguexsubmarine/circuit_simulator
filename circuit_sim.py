@@ -372,6 +372,7 @@ class MainWindow(QMainWindow):
         write_into_files(data)
 
         # executing C program
+        os.system('chmod + execute.sh')
         os.system('./execute.sh')
 
 
