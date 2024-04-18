@@ -8,7 +8,6 @@ In this repository, you'll find the GUI component that allows users to input com
 
 ## Screenshots
 
-![ScreenShot](./images/ss1.png)
 ![ScreenShot](./images/ss2.png)
 
 
