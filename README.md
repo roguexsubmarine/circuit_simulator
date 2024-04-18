@@ -8,8 +8,9 @@ In this repository, you'll find the GUI component that allows users to input com
 
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)  
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![ScreenShot](./images/ss1.png)
+![ScreenShot](./images/ss2.png)
+
 
 
 
@@ -24,7 +25,7 @@ Clone the project
 Go to the project directory
 
 ```bash
-  cd cd circuit_simulator/
+  cd circuit_simulator/
 ```
 
 Install Modules
