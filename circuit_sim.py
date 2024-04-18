@@ -2,15 +2,12 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QRadioButton, QHBoxLayout, QGridLayout, QPushButton, QLineEdit
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon, QPixmap, QTransform
-from gui_to_file import initmatrix, write_file
 import numpy as np
 import os 
 
 global Cvalue
 global blocksize
 global dimension
-global matrix
-
 
 
 class MainWindow(QMainWindow):
@@ -42,6 +39,7 @@ class MainWindow(QMainWindow):
         self.battery_button = QRadioButton("Battery")
         self.wire_button = QRadioButton("Wire")
         self.node_button = QRadioButton("Node")
+        self.erase_button = QRadioButton("Erase")
         
         ## Set "Wire" radio button as default selected
         self.wire_button.setChecked(True)
@@ -51,6 +49,7 @@ class MainWindow(QMainWindow):
         self.battery_button.clicked.connect(self.radio_button_clicked)
         self.wire_button.clicked.connect(self.radio_button_clicked)
         self.node_button.clicked.connect(self.radio_button_clicked)
+        self.erase_button.clicked.connect(self.radio_button_clicked)
 
 
         ### Adding components to left Panel 
@@ -59,6 +58,7 @@ class MainWindow(QMainWindow):
         leftPanel.addWidget(self.battery_button)
         leftPanel.addWidget(self.wire_button)
         leftPanel.addWidget(self.node_button)
+        leftPanel.addWidget(self.erase_button)
 
         ## Create a "Clear" button
         clear_button = QPushButton("Clear")
@@ -83,9 +83,6 @@ class MainWindow(QMainWindow):
         global blocksize
         blocksize = 40
 
-        ## calling initmatrix function from another file to create emptry matrix
-        global matrix
-        matrix = initmatrix(n)
 
         self.buttons = []  # List to hold all buttons
         self.button_rotations = {}  # Dictionary to store rotation angle for each button
@@ -104,9 +101,11 @@ class MainWindow(QMainWindow):
                 for j in range(n):
                     button = QPushButton()
                     if j%2 != 0:
+                        ### i even j odd
                         button.setCheckable(True)
                         button.setFixedSize(QSize(int(blocksize), int(blocksize/2)))
                     else:
+                        ### i even j even
                         button.setCheckable(True)
                         button.setFixedSize(QSize(int(blocksize/2), int(blocksize/2)))
                 
@@ -124,9 +123,11 @@ class MainWindow(QMainWindow):
                 for j in range(n):
                     button = QPushButton()
                     if j%2 != 0:
+                        ### i odd j odd
                         button.setCheckable(True)
                         button.setFixedSize(QSize(int(blocksize), int(blocksize)))
                     else:
+                        ### i odd j even
                         button.setCheckable(True)
                         button.setFixedSize(QSize(int(blocksize/2), int(blocksize)))
 
@@ -165,13 +166,22 @@ class MainWindow(QMainWindow):
             print("Active Component:", self.active_component)
 
     def button_clicked(self, row, col):
+
         global Cvalue
         global blocksize
         global dimension
-        global matrix
 
         # print(row * dimension + col)
         button = self.buttons[row * dimension + col]  # Get the button at the specified row and column
+
+        if self.active_component == 'Erase':
+            button.setChecked(False)
+            button.setIcon(QIcon())  # Clear the icon
+            self.button_rotations[button] = 0  # Reset rotation angle to 0
+            return
+
+        
+
         icon_path = f"./icons/{self.active_component.lower()}.jpg"
         pixmap = QPixmap(icon_path)
 
@@ -197,66 +207,9 @@ class MainWindow(QMainWindow):
         # print(self.active_component)
         if self.active_component=='Wire' or self.active_component=='Node':
             val = 0 
-        
-        if self.active_component=='Wire' or self.active_component=='Resistor':
-            if rotation == 180:
-                rotation = 0
-            if rotation == 270:
-                rotation = 90
-                
-
-        if self.active_component=='Node':
-            rotation = 0
 
         button_value = button.property("button_value")
-
-        
-        match rotation:
-            case 0:
-                direction = "  ({row}, {col}) -> ({newrow}, {newcol})".format(row=row, col=col, newrow=row, newcol=col+1)
-            case 90:
-                direction = " ({row}, {col}) -> ({newrow}, {newcol})".format(row=row, col=col, newrow=row+1, newcol=col)
-            case 180:
-                direction = "({row}, {col}) -> ({newrow}, {newcol})".format(row=row, col=col+1, newrow=row, newcol=col)
-            case 270:
-                direction = "({row}, {col}) -> ({newrow}, {newcol})".format(row=row+1, col=col, newrow=row, newcol=col)
-
-        n = dimension
-        bval = 0
-        newbval = 0
-        match rotation:
-            case 0:
-                bval=button_value
-                newbval=button_value+1
-                edge = "{bval} -> {newbval}".format(bval=button_value, newbval=button_value+1)
-            case 90:
-                bval=button_value
-                newbval=button_value+n
-                edge = "{bval} -> {newbval}".format(bval=button_value, newbval=button_value+n)
-            case 180:
-                bval=button_value+1
-                newbval=button_value
-                edge = "{bval} -> {newbval}".format(bval=button_value-1, newbval=button_value)
-            case 270:
-                edge = "{bval} -> {newbval}".format(bval=button_value-n, newbval=button_value)
-                bval=button_value-n
-                newbval=button_value
-
-
-        if self.active_component=='Node':
-                direction =  "\n({row}, {col}) -> ({newrow}, {newcol})".format(row=row, col=col, newrow=row, newcol=col+1)
-                direction += "\n({row}, {col}) -> ({newrow}, {newcol})".format(row=row, col=col, newrow=row+1, newcol=col)
-                direction += "\n({row}, {col}) -> ({newrow}, {newcol})".format(row=row, col=col+1, newrow=row, newcol=col)
-                direction += "\n({row}, {col}) -> ({newrow}, {newcol})".format(row=row+1, col=col, newrow=row, newcol=col)
-
-                edge  = "\n{bval} -> {newbval}".format(bval=button_value, newbval=button_value+1)
-                edge += "\n{bval} -> {newbval}".format(bval=button_value, newbval=button_value+n)
-                edge += "\n{bval} -> {newbval}".format(bval=button_value-1, newbval=button_value)
-                edge += "\n{bval} -> {newbval}".format(bval=button_value-n, newbval=button_value)
-
-
-        # print("Row, Col:", row, col, self.active_component, val, rotation, direction, '\nedge :', edge)
-        print(self.active_component, val, rotation,'\nedge :', edge)
+        print(self.active_component, val, button_value, rotation)
 
 
 
@@ -268,12 +221,8 @@ class MainWindow(QMainWindow):
             button.setIcon(QIcon())  # Clear the icon
             self.button_rotations[button] = 0  # Reset rotation angle to 0
 
-        global matrix
         global dimension
-        global dict
-        dict = {}
         n = dimension
-        matrix = initmatrix(n)
 
         print("Buttons Cleared")
 
