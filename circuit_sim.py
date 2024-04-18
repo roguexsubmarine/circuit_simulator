@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.resistor_button = QRadioButton("Resistor")
         self.battery_button = QRadioButton("Battery")
         self.wire_button = QRadioButton("Wire")
-        self.node_button = QRadioButton("Node")
+        # self.node_button = QRadioButton("Node")
         self.erase_button = QRadioButton("Erase")
         
         ## Set "Wire" radio button as default selected
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.resistor_button.clicked.connect(self.radio_button_clicked)
         self.battery_button.clicked.connect(self.radio_button_clicked)
         self.wire_button.clicked.connect(self.radio_button_clicked)
-        self.node_button.clicked.connect(self.radio_button_clicked)
+        # self.node_button.clicked.connect(self.radio_button_clicked)
         self.erase_button.clicked.connect(self.radio_button_clicked)
 
 
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         leftPanel.addWidget(self.resistor_button)
         leftPanel.addWidget(self.battery_button)
         leftPanel.addWidget(self.wire_button)
-        leftPanel.addWidget(self.node_button)
+        # leftPanel.addWidget(self.node_button)
         leftPanel.addWidget(self.erase_button)
 
         ## Create a "Clear" button
@@ -90,6 +90,9 @@ class MainWindow(QMainWindow):
 
         blocksize = 50
 
+
+
+        #### layout 
 
         ### i even j even - node
         ### i even j odd  - horizontal component
@@ -174,15 +177,24 @@ class MainWindow(QMainWindow):
         # print(row * dimension + col)
         button = self.buttons[row * dimension + col]  # Get the button at the specified row and column
 
+        if row%2!=0 and col%2!=0:
+            button.setChecked(False)
+            button.setIcon(QIcon())
+            self.button_rotations[button] = 0
+            return
+
+
         if self.active_component == 'Erase':
             button.setChecked(False)
             button.setIcon(QIcon())  # Clear the icon
-            self.button_rotations[button] = 0  # Reset rotation angle to 0
             return
 
         
-
+        
         icon_path = f"./icons/{self.active_component.lower()}.jpg"
+        if row%2==0 and col%2==0:
+            icon_path = "./icons/node.jpg"
+            val = 0
         pixmap = QPixmap(icon_path)
 
 
