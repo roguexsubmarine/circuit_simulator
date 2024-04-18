@@ -80,13 +80,13 @@ class MainWindow(QMainWindow):
         ## number of column and rows of the grid
         global dimension
         global nodedimension
-        nodedimension = 3
+        nodedimension = 8
         dimension = nodedimension*2 - 1
         n = dimension
         
         ## size in pixel 
         global blocksize
-        blocksize = 40
+        blocksize = 50
 
 
         self.buttons = []  # List to hold all buttons
@@ -183,8 +183,11 @@ class MainWindow(QMainWindow):
         button = self.buttons[row * dimension + col]  # Get the button at the specified row and column
 
         if row%2!=0 and col%2!=0:
-            button.setChecked(False)
-            button.setIcon(QIcon())
+            button.setChecked(True)
+            icon_path = f"./icons/blank.jpg"
+            pixmap = QPixmap(icon_path)
+            button.setIcon(QIcon(pixmap))
+            button.setIconSize(QSize(blocksize, blocksize))
             self.button_rotations[button] = 0
             return
 
