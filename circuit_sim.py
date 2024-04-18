@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
         
         ## number of column and rows of the grid
         global dimension
-        dimension = 10
+        dimension = 11
         n = dimension
         
         ## size in pixel 
@@ -90,30 +90,20 @@ class MainWindow(QMainWindow):
         self.buttons = []  # List to hold all buttons
         self.button_rotations = {}  # Dictionary to store rotation angle for each button
 
-        # for i in range(n):
-        #     for j in range(n):
-        #         button = QPushButton()
-        #         button.setCheckable(True)
-        #         button.setFixedSize(QSize(blocksize, blocksize))
-        #         button.clicked.connect(lambda checked, i=i, j=j: self.button_clicked(i, j))
-        #         rightGrid.addWidget(button, i, j)
-
-        #         button.setProperty("button_value", n*i + j)
-        #         # Retrieving the value later
-        #         button_value = button.property("button_value")
-        #         # print("Button Value:", button_value)
-
-        #         self.buttons.append(button)  # Add button to the list
-        #         self.button_rotations[button] = 0  # Initial rotation angle is 0
-
 
         blocksize = 50
+
+
+        ### i even j even - node
+        ### i even j odd  - horizontal component
+        ### i odd  j even - verticle component
+        ### i odd  j odd  - block
 
         for i in range(n):
             if i%2 == 0:
                 for j in range(n):
                     button = QPushButton()
-                    if j%2 == 0:
+                    if j%2 != 0:
                         button.setCheckable(True)
                         button.setFixedSize(QSize(int(blocksize), int(blocksize/2)))
                     else:
@@ -133,7 +123,7 @@ class MainWindow(QMainWindow):
             else:
                 for j in range(n):
                     button = QPushButton()
-                    if j%2 == 0:
+                    if j%2 != 0:
                         button.setCheckable(True)
                         button.setFixedSize(QSize(int(blocksize), int(blocksize)))
                     else:
@@ -263,39 +253,6 @@ class MainWindow(QMainWindow):
                 edge += "\n{bval} -> {newbval}".format(bval=button_value, newbval=button_value+n)
                 edge += "\n{bval} -> {newbval}".format(bval=button_value-1, newbval=button_value)
                 edge += "\n{bval} -> {newbval}".format(bval=button_value-n, newbval=button_value)
-
-
-
-        ## adding into matrix
-
-        ## clear earlier edges of that node
-        for i in range(n):
-            matrix[bval][i] = 0
-            matrix[newbval][i] = 0
-            matrix[i][bval] = 0
-            matrix[i][newbval] = 0
-
-
-        if self.active_component=='Wire' or self.active_component=='Battery' or self.active_component=='Resistor':
-            matrix[bval][newbval] = 1
-            matrix[newbval][bval] = 1
-        
-        if self.active_component=='Node':
-            newbval = bval + 1
-            matrix[bval][newbval] = 1
-            matrix[newbval][bval] = 1
-
-            matrix[bval][newbval + n] = 1
-            matrix[newbval+n][bval] = 1
-
-
-
-            
-        write_file(matrix)
-        
-
-
-
 
 
         # print("Row, Col:", row, col, self.active_component, val, rotation, direction, '\nedge :', edge)
