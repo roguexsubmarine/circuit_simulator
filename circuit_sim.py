@@ -115,10 +115,10 @@ class MainWindow(QMainWindow):
                     # print(i, j)
                     rightGrid.addWidget(button, i, j)
 
-                    button.setProperty("button_value", n*i + j)
+                    button.setProperty("button_name", n*i + j)
                     # Retrieving the value later
-                    button_value = button.property("button_value")
-                    # print("Button Value:", button_value)
+                    button_name = button.property("button_name")
+                    # print("Button Value:", button_name)
                     self.buttons.append(button)  # Add button to the list
                     self.button_rotations[button] = 0  # Initial rotation angle is 0
             else:
@@ -137,10 +137,10 @@ class MainWindow(QMainWindow):
                     # print(i, j)
                     rightGrid.addWidget(button, i, j)
 
-                    button.setProperty("button_value", n*i + j)
+                    button.setProperty("button_name", n*i + j)
                     # Retrieving the value later
-                    button_value = button.property("button_value")
-                    # print("Button Value:", button_value)
+                    button_name = button.property("button_name")
+                    # print("Button Value:", button_name)
                     self.buttons.append(button)  # Add button to the list
                     self.button_rotations[button] = 90  # Initial rotation angle is 0
                         
@@ -219,8 +219,16 @@ class MainWindow(QMainWindow):
         if self.active_component=='Wire' or self.active_component=='Node':
             val = 0 
 
+        button.setProperty("button_value", val)
+        button.setProperty("button_rotation", rotation)
+
+        button_name = button.property("button_name")
         button_value = button.property("button_value")
-        print(self.active_component, val, button_value, rotation)
+        button_rotation = button.property("button_rotation")
+
+
+
+        print(self.active_component, button_name, button_value, button_rotation)
 
 
 
@@ -249,7 +257,12 @@ class MainWindow(QMainWindow):
         print('value = ',value)
     
     def solve(self):
-        os.system('./a.out')
+        for button in self.buttons:
+            button_name = button.property("button_name")
+            button_value = button.property("button_value")
+            button_rotation = button.property("button_rotation")
+
+            print(button_name, button_value, button_rotation)
 
     
 
