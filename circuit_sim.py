@@ -7,6 +7,7 @@ import os
 global Cvalue
 global blocksize
 global dimension
+global nodedimension
 
 
 class MainWindow(QMainWindow):
@@ -75,7 +76,9 @@ class MainWindow(QMainWindow):
         
         ## number of column and rows of the grid
         global dimension
-        dimension = 11
+        global nodedimension
+        nodedimension = 4
+        dimension = nodedimension*2 - 1
         n = dimension
         
         ## size in pixel 
@@ -221,14 +224,42 @@ class MainWindow(QMainWindow):
 
         button.setProperty("button_value", val)
         button.setProperty("button_rotation", rotation)
+        button.setProperty("button_row", row)
+        button.setProperty("button_col", col)
+        button.setProperty("button_component", self.active_component)
 
         button_name = button.property("button_name")
         button_value = button.property("button_value")
         button_rotation = button.property("button_rotation")
+        button_row = button.property("button_row")
+        button_col = button.property("button_col")
+        button_component = button.property("button_component")
+
+        #### layout reminder
+
+        ### i even j even - node
+        ### i even j odd  - horizontal component
+        ### i odd  j even - verticle component
+        ### i odd  j odd  - block
+
+        edge="-"
+        n = dimension
+
+        if (button_row%2!=0 and button_col%2==0):
+            if button_rotation == 90:
+                edge = "{node1}->{node2}".format(node1=button_name-n, node2=button_name+n)
+            if button_rotation == 270:
+                edge = "{node1}->{node2}".format(node1=button_name+n, node2=button_name-n)
+
+        if (button_row%2==0 and button_col%2!=0):
+            if button_rotation == 0:
+                edge = "{node1}->{node2}".format(node1=button_name-1, node2=button_name+1)
+            if button_rotation == 180:
+                edge = "{node1}->{node2}".format(node1=button_name+1, node2=button_name-1)
 
 
-
-        print(self.active_component, button_name, button_value, button_rotation)
+        print(button_component,'\t', button_name,'\t', button_value,'\t', button_rotation,'\t', button_row,'\t', button_col,'\t', edge)
+        return
 
 
 
@@ -261,8 +292,11 @@ class MainWindow(QMainWindow):
             button_name = button.property("button_name")
             button_value = button.property("button_value")
             button_rotation = button.property("button_rotation")
+            button_row = button.property("button_row")
+            button_col = button.property("button_col")
+            button_component = button.property("button_component")
 
-            print(button_name, button_value, button_rotation)
+            print(button_component, button_name, button_value, button_rotation, button_row, button_col)
 
     
 
