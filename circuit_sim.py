@@ -2,12 +2,15 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QRadioButton, QHBoxLayout, QGridLayout, QPushButton, QLineEdit
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon, QPixmap, QTransform
+from gui_to_file import initmatrix, insertdata, remove_zero_rows_and_cols, write_into_files, add_zero_row_and_column
 import os 
+import numpy as np
 
 global Cvalue
 global blocksize
 global dimension
 global nodedimension
+global button_edge_set
 
 
 class MainWindow(QMainWindow):
@@ -77,7 +80,7 @@ class MainWindow(QMainWindow):
         ## number of column and rows of the grid
         global dimension
         global nodedimension
-        nodedimension = 4
+        nodedimension = 3
         dimension = nodedimension*2 - 1
         n = dimension
         
@@ -222,7 +225,7 @@ class MainWindow(QMainWindow):
         if self.active_component=='Wire' or self.active_component=='Node':
             val = 0 
 
-        button.setProperty("button_value", val)
+        button.setProperty("button_value", float(val))
         button.setProperty("button_rotation", rotation)
         button.setProperty("button_row", row)
         button.setProperty("button_col", col)
@@ -242,20 +245,35 @@ class MainWindow(QMainWindow):
         ### i odd  j even - verticle component
         ### i odd  j odd  - block
 
-        edge="-"
+        edge = '-----'
         n = dimension
+        button.setProperty("button_edge_from", None)
+        button.setProperty("button_edge_to", None)
+        node1 = None
+        node2 = None
 
         if (button_row%2!=0 and button_col%2==0):
             if button_rotation == 90:
-                edge = "{node1}->{node2}".format(node1=button_name-n, node2=button_name+n)
+                node1 = button_name - n
+                node2 = button_name + n
             if button_rotation == 270:
-                edge = "{node1}->{node2}".format(node1=button_name+n, node2=button_name-n)
-
+                node1 = button_name + n
+                node2 = button_name - n
+            edge = "{node1}->{node2}".format(node1 = node1, node2 = node2)
+            button.setProperty("button_edge_from", node1)
+            button.setProperty("button_edge_to", node2)
         if (button_row%2==0 and button_col%2!=0):
             if button_rotation == 0:
-                edge = "{node1}->{node2}".format(node1=button_name-1, node2=button_name+1)
+                node1 = button_name - 1
+                node2 = button_name + 1
             if button_rotation == 180:
-                edge = "{node1}->{node2}".format(node1=button_name+1, node2=button_name-1)
+                node1 = button_name + 1
+                node2 = button_name - 1
+            edge = "{node1}->{node2}".format(node1 = node1, node2 = node2)
+            button.setProperty("button_edge_from", node1)
+            button.setProperty("button_edge_to", node2)
+        
+
 
 
         print(button_component,'\t', button_name,'\t', button_value,'\t', button_rotation,'\t', button_row,'\t', button_col,'\t', edge)
@@ -274,6 +292,9 @@ class MainWindow(QMainWindow):
         global dimension
         n = dimension
 
+        global button_edge_set
+        button_edge_set = []
+
         print("Buttons Cleared")
 
 
@@ -288,6 +309,11 @@ class MainWindow(QMainWindow):
         print('value = ',value)
     
     def solve(self):
+        global button_edge_set
+        button_edge_set = []
+        data = None
+
+        
         for button in self.buttons:
             button_name = button.property("button_name")
             button_value = button.property("button_value")
@@ -295,13 +321,65 @@ class MainWindow(QMainWindow):
             button_row = button.property("button_row")
             button_col = button.property("button_col")
             button_component = button.property("button_component")
+            button_edge_from = button.property("button_edge_from")
+            button_edge_to = button.property("button_edge_to")
+            # print(button_component, button_name, button_value, button_rotation, button_row, button_col, button_edge_from, button_edge_to)
+            
+            ## params passing lists
+            element = [button_component, button_value, button_edge_from, button_edge_to]
+            button_edge_set.append(element)
 
-            print(button_component, button_name, button_value, button_rotation, button_row, button_col)
+        
+        ### calling file writing functions
 
-    
+        #init matrix
+        global dimension
+        matrix_dimension= dimension*dimension
+        matrix, Rmatrix, Vmatrix = initmatrix(matrix_dimension)
+
+        data = [matrix, Rmatrix, Vmatrix]
+
+        # print(button_edge_set)
+        # print(matrix)
+
+
+        # put values in those matrices
+        data = insertdata(data, button_edge_set)
+
+        #slice the three matrices
+        data = remove_zero_rows_and_cols(data)
+
+        #### adding empty row and empty column as per request by 
+        #### Tejas Joshi , Soham Haldankar, Tejas Kolhe
+        #### for C program
+        data[0] = add_zero_row_and_column(data[0])
+        data[1] = add_zero_row_and_column(data[1])
+        data[2] = add_zero_row_and_column(data[2])
+
+        
+
+        print("\nprinting adjacency matrix...")
+        print(data[0])
+        print("\nprinting resistor matrix...")
+        print(data[1])
+        print("\nprinting voltage matrix...")
+        print(data[2])
+
+        # writing all the necessary files
+        write_into_files(data)
+
+        # executing C program
+        os.system('./execute.sh')
 
 
 
+        
+
+
+
+
+
+### program starts
 
 app = QApplication(sys.argv)
 window = MainWindow()
