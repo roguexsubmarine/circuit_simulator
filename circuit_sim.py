@@ -182,6 +182,11 @@ class MainWindow(QMainWindow):
         # print(row * dimension + col)
         button = self.buttons[row * dimension + col]  # Get the button at the specified row and column
 
+        if self.active_component == 'Erase':
+            button.setChecked(False)
+            button.setIcon(QIcon())  # Clear the icon
+            return
+
         if row%2!=0 and col%2!=0:
             button.setChecked(True)
             icon_path = f"./icons/blank.jpg"
@@ -190,13 +195,6 @@ class MainWindow(QMainWindow):
             button.setIconSize(QSize(blocksize, blocksize))
             self.button_rotations[button] = 0
             return
-
-
-        if self.active_component == 'Erase':
-            button.setChecked(False)
-            button.setIcon(QIcon())  # Clear the icon
-            return
-
         
         
         icon_path = f"./icons/{self.active_component.lower()}.jpg"
@@ -328,7 +326,7 @@ class MainWindow(QMainWindow):
             button_edge_to = button.property("button_edge_to")
             # print(button_component, button_name, button_value, button_rotation, button_row, button_col, button_edge_from, button_edge_to)
             
-            ## params passing lists
+            ## args passing lists
             element = [button_component, button_value, button_edge_from, button_edge_to]
             button_edge_set.append(element)
 
@@ -351,6 +349,8 @@ class MainWindow(QMainWindow):
 
         #slice the three matrices
         data = remove_zero_rows_and_cols(data)
+
+
 
         #### adding empty row and empty column as per request by 
         #### Tejas Joshi , Soham Haldankar, Tejas Kolhe
