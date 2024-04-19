@@ -288,7 +288,6 @@ class MainWindow(QMainWindow):
         for button in self.buttons:
             button.setChecked(False)
             button.setIcon(QIcon())  # Clear the icon
-            self.button_rotations[button] = 0  # Reset rotation angle to 0
 
         global dimension
         n = dimension
